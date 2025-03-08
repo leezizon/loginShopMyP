@@ -1,0 +1,326 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('myapp:server');
+var http = require('http');
+// const WebSocket = require('ws');
+const {Server} = require('socket.io');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+      origin: "http://localhost:5500",
+      methods: ["GET", "POST"]
+  }
+});
+var guestList = [];
+var userList = [];
+var roomList = [];
+
+var battleUserList = [[],[],[]];//배틀유저 배정(2명까지만 허용임)
+var battleSet = [{player1: null, player2: null},{player1: null, player2: null},{player1: null, player2: null}];
+
+var userSnList = [0,0,0]; //sn번호배정
+var userTokenList = [0,0,0]; //토큰이미지배정
+var uploadAuthList = ['youRN','youRN','youRN'];//각 방마다 이미지 업로드 권한을 가진 
+
+
+
+
+
+
+let connectedClients = {};
+
+
+io.on("connection",(socket)=>{
+  socket.onAny((event)=>{
+    console.log(event);
+  });
+  socket.on("room", (roomName,profiliImg) =>{
+    // close the database connection
+    socket.join(roomName);
+
+    //방은 중복으로 리스트에 넣지 않는다
+    if (!roomList.includes(roomName)) {
+      roomList.push(roomName);
+      guestList.push([]);
+      userList.push([]);
+    }
+    var myRoomIdx = roomList.indexOf(roomName);
+    guestList[myRoomIdx].push(socket.id);
+
+    console.log(roomList);
+    console.log(myRoomIdx);
+    console.log(profiliImg);
+
+    socket.emit("guestList",guestList[myRoomIdx],socket.id,userList[myRoomIdx],userSnList[myRoomIdx],userTokenList[myRoomIdx],profiliImg);
+    userSnList[myRoomIdx] = userSnList[myRoomIdx] + 1;
+    if(userTokenList[myRoomIdx] < 5){
+      userTokenList[myRoomIdx] = userTokenList[myRoomIdx] +1;
+    }else{
+      userTokenList[myRoomIdx] = 0;
+    }
+  
+
+    socket.on("updateGuestListOne", (List) =>{
+      userList[myRoomIdx] = List;
+      io.to(roomName).emit("updateGuestList", userList[myRoomIdx], 'plate', battleUserList[myRoomIdx]);
+    });
+  
+    socket.on("updateGuestList", (userP,x,y) =>{
+      console.log(guestList[myRoomIdx]);
+      console.log(userP);
+      for (let i = userList[myRoomIdx].length - 1; i >= 0; i--){
+        const user = userList[myRoomIdx][i];
+        if(userP.id === userList[myRoomIdx][i].id){
+            if(x != 0){
+                user.x = user.x + x;
+            }else{
+                user.y = user.y + y;
+            }
+        }
+      }
+      io.to(roomName).emit("updateGuestList", userList[myRoomIdx], 'Nplate');
+    });
+  
+    socket.on('screenB', (data) => {
+      // 클라이언트로부터 이미지를 수신하면 해당 이미지를 모든 클라이언트에게 전송합니다.
+      io.to(roomName).emit('screenF', data);
+    });
+
+    //현재 이미지 업로드 권한교체
+    socket.on('screenAuthPut', (data) => {
+      uploadAuthList[myRoomIdx] = data;
+      console.log(uploadAuthList[myRoomIdx]);
+    });
+
+    //현재 이미지 업로드 권한이 있는지 물어봄
+    socket.on('screenAuthChk', (data) => {
+      if(data == uploadAuthList[myRoomIdx]){
+        console.log('ok');
+        socket.emit("screenAuthChk", true);
+      }else{
+        socket.emit("screenAuthChk", false);
+      }
+    });
+
+    socket.on("nicB", (sentence, userMeImg) =>{
+      const user = userList[myRoomIdx].find(user => userMeImg === user.imgSn);
+      user.nicName = sentence;
+      console.log(sentence);
+      io.to(roomName).emit("nicF", sentence,userMeImg);
+    });
+
+    socket.on("profileImgB", (url, userMeImg) =>{
+      io.to(roomName).emit("profileImgF", url,userMeImg);
+    });
+
+    socket.on("talkB", (sentence, userMeImg, img, nic) =>{
+      io.to(roomName).emit("talkF", sentence,userMeImg,img,nic);
+    });
+  
+    socket.on("BscreenB", (userCode, userSn, profiliImg) =>{
+      battleUserList[myRoomIdx].push({battleUserCode:userCode, battleUserSn:userSn, profileImgSn:profiliImg});
+      io.to(roomName).emit("BscreenF", battleUserList[myRoomIdx]);
+    });
+
+    socket.on("XBscreenB", (List) =>{
+      battleUserList[myRoomIdx] = List;
+      io.to(roomName).emit("BscreenF", battleUserList[myRoomIdx]);
+    });
+
+    //가위바위보
+    socket.on("rcpResult", (rcp,user) =>{
+      // 플레이어의 이름을 기반으로 입력을 처리합니다.
+      if (battleSet[myRoomIdx].player1 && battleSet[myRoomIdx].player1.name === user) {
+        // 플레이어 1의 선택을 덮어씁니다.
+        battleSet[myRoomIdx].player1.rcp = rcp;
+      } else if (battleSet[myRoomIdx].player2 && battleSet[myRoomIdx].player2.name === user) {
+          // 플레이어 2의 선택을 덮어씁니다.
+          battleSet[myRoomIdx].player2.rcp = rcp;
+      } else {
+          // 이름에 따라 해당 플레이어의 선택을 저장합니다.
+          if (battleSet[myRoomIdx].player1 === null) {
+            battleSet[myRoomIdx].player1 = { name: user, rcp };
+          } else if (battleSet[myRoomIdx].player2 === null) {
+            battleSet[myRoomIdx].player2 = { name: user, rcp };
+          }
+      }
+      console.log(battleSet[myRoomIdx].player1);
+      console.log(battleSet[myRoomIdx].player2);
+
+      // 두 명의 선택이 모두 수신되었을 때 결과를 계산합니다.
+      if (battleSet[myRoomIdx].player1 !== null && battleSet[myRoomIdx].player2 !== null) {
+          const { name: name1, rcp: choice1 } = battleSet[myRoomIdx].player1;
+          const { name: name2, rcp: choice2 } = battleSet[myRoomIdx].player2;
+
+          // 가위바위보 결과 계산
+          let result;
+          if (choice1 === choice2) {
+              result = '무승부';
+          } else if (
+              (choice1 === 2 && choice2 === 0) || // 바위가 가위를 이김
+              (choice1 === 1 && choice2 === 2) || // 보가 바위를 이김
+              (choice1 === 0 && choice2 === 1)    // 가위가 보를 이김
+          ) {
+              result = `${name1} 승리`;
+          } else {
+              result = `${name2} 승리`;
+          }
+
+          // 결과를 각 플레이어에게 전송합니다.
+          io.to(roomName).emit("BscreenFResult", result);
+
+          console.log(result);
+          // 게임 데이터를 초기화합니다.
+          battleSet[myRoomIdx] = {
+              player1: null,
+              player2: null
+          };
+      }
+    });
+
+    socket.on("disconnecting", () =>{
+      if(guestList[myRoomIdx].length == 1){
+        console.log(userList[myRoomIdx].length);
+        console.log(userList[myRoomIdx]);
+        console.log(guestList[myRoomIdx]);
+        guestList[myRoomIdx].splice(0,1);
+        userList[myRoomIdx].splice(0,1);
+        battleUserList[myRoomIdx].splice(0,1);
+        console.log('혼자였는데나감');
+        //userList guestList 크기가 같은지 비교
+        if(userList[myRoomIdx].length!=guestList[myRoomIdx].length){
+          console.log('오류가 있는 방입니다, 방을 비웁니다');
+          battleUserList[myRoomIdx].splice(0);
+          guestList[myRoomIdx].splice(0);
+          userList[myRoomIdx].splice(0);
+        }
+      }else{
+        socket.rooms.forEach((room)=>socket.to(room).emit("bye",socket.id));
+        for (let i = guestList[myRoomIdx].length - 1; i >= 0; i--){
+          if(guestList[myRoomIdx][i]===socket.id){
+            guestList[myRoomIdx].splice(i,1);
+            console.log('나감');
+          }
+        }
+      }
+    });
+
+
+  });
+
+  socket.on("otherRoom", (roomName) =>{
+    const roomSizeIn = io.sockets.adapter.rooms.get(roomName)?.size || 0;
+    if(roomSizeIn < 5){
+      socket.join(roomName);
+      connectedClients[socket.id] = socket;
+      io.to(roomName).emit("setUser",Object.keys(connectedClients));
+      console.log(`게임유저 들어왓습니다~ ${roomSizeIn}명`);
+    }else{
+      console.log(`방이 꽉 찻어요~`);
+    }
+
+    socket.on("sendAllS", (userInfo,stateSrc) =>{
+      io.to(roomName).emit('sendAllF', socket.id, userInfo, stateSrc);
+      console.log(stateSrc);
+    })
+
+    socket.on("disconnecting", () =>{
+      delete connectedClients[socket.id];
+      socket.broadcast.emit('setUser', Object.keys(connectedClients));
+      Object.keys(connectedClients).forEach(Client => {
+          console.log(connectedClients[Client].id);
+          console.log(Client);
+          console.log('------------------------------------------------');
+      });
+      const roomSizeOut = io.sockets.adapter.rooms.get(roomName)?.size || 0;
+      console.log(`방을 나갑니다${roomSizeOut}명`);
+    })
+  })
+});
+
+
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>회원가입</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f2f2f2;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+
+            .login-container {
+                background-color: white;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+                text-align: center;
+            }
+
+            .form-group {
+                display: flex;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            label {
+                /* display: block; */
+                width: 110px;
+                margin-right: 5px;
+                font-weight: bold;
+            }
+
+            input[type="text"],
+            input[type="password"] {
+                width: 300px;
+                padding: 10px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+            }
+
+            input[type="email"] {
+                width: 200px;
+                padding: 10px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+            }
+
+            .check {
+                width: 200px;
+                padding: 10px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+            }
+
+            .button {
+                margin: 25px;
+                background-color: #007bff;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+            }
+
+            .button:hover {
+                background-color: #0056b3;
+            }
+
+            #my-button img{
+                width: 100%;
+                height: 100%;
+            }
+
+            .timer{
+                right: 16px;
+                top:16px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-container">
+            <h1>회원가입</h1>
+            <div style="display: flex; justify-content: center;">
+                <div id="my-button" onclick="onClickUpload()" style="overflow: hidden; border-radius: 100%; background-color: black; opacity: 50%; width: 300px; height:300px; display: flex; justify-content: center; align-items: center; margin-bottom: 30px;">
+                    <div style="position: absolute; color: white;">300:300 이하 사이즈</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email">사용자 이메일</label>
+                <div>
+                    <input type="email" id="email" name="email" required>
+                    <input class="check" id="emailChkCode" name="emailChkCode" style="display: none;">
+                </div>
+                <div>
+                    <span class="timer"></span>
+                    <button id="emailSubmit" style="margin-left: 10px;">인증 코드 요청</button>
+                    <button id="emailCodeSubmit" style=" margin-left: 10px; display: none;">인증하기</button>
+                </div>
+                </div>
+
+            <form id="signIn-form" method="post" enctype="multipart/form-data">
+                <input id="my-input" type="file" style="display: none;" name="profileImg"/>
+               <div class="form-group">
+                    <label for="email">사용자 이름</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">비밀번호 확인</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <span id="password-match" style="display: none;">비밀번호가 일치하지 않습니다.</span>
+                    <span id="password-match-success" style="display: none;">비밀번호가 일치합니다.</span>
+                <div style="display: flex; justify-content: center;">
+                    <button class="button" id="signup-form" type="submit">회원가입</button>
+                </div>
+            </form>
+        </div>
+        <script>
+            let EsessionId = ''
+            const emailCheck = document.getElementById('emailSubmit');
+            const emailCheck2 = document.getElementById('emailCodeSubmit');
+    
+            const  timer = document.querySelector(".timer");
+
+            emailCheck.addEventListener('click', (event) => {
+                // const regEmail = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+                const email = document.getElementById('email').value;
+                fetch('/emailCheckToSignUp', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.msg);
+                    if(data.ok){
+                        timer_start();
+                        EsessionId = data.sessionId;
+                        document.getElementById('emailSubmit').style.display = "none";
+                        document.getElementById('emailCodeSubmit').style.display = "block";
+                        document.getElementById('email').disabled=true;
+                        document.getElementById('emailChkCode').style.display = "block";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('인증 요청 중 오류가 발생했습니다.');
+                });
+            });
+
+            emailCheck2.addEventListener('click', (event) => {
+                const email = document.getElementById('email').value;
+                const code = document.getElementById('emailChkCode').value;
+                fetch('/emailCheckCode', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ code: code, email: email, sessionId: EsessionId})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('emailChkCode').disabled = true;
+                        alert('인증완료 되었습니다');
+                    } else {
+                        alert('인증에 실패하였습니다, 다시 시도해주세요');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('인증 요청 중 오류가 발생했습니다.');
+                });
+            });
+
+            document.getElementById('signIn-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                const email = document.getElementById('email').value;
+                formData.append('sessionId', EsessionId);
+                formData.append('email', email);
+
+                fetch('/signUp', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data=>{
+                    alert(data.msg);
+                    if(data.re){
+                        location.href=data.re;
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Form submission failed!');
+                });
+            })
+
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm-password');
+            const passwordMatch = document.getElementById('password-match');
+            const passwordMatchSuccess = document.getElementById('password-match-success');
+
+            function checkPasswords() {
+                if (password.value === confirmPassword.value) {
+                    passwordMatch.style.display = 'none';
+                    passwordMatchSuccess.style.display = 'block';
+                } else {
+                    passwordMatch.style.display = 'block';
+                    passwordMatchSuccess.style.display = 'none';
+                }
+            }
+
+            confirmPassword.addEventListener('input', checkPasswords);
+
+            document.getElementById('signup-form').addEventListener('submit', function(event) {
+                if (password.value !== confirmPassword.value) {
+                    event.preventDefault(); // 비밀번호가 일치하지 않으면 제출을 중단
+                    alert('비밀번호가 일치하지 않습니다. 다시 확인해 주세요.');
+                }
+            });
+
+            let mybutton = document.getElementById("my-button");
+
+            function onClickUpload() {
+                let myInput = document.getElementById("my-input");
+                myInput.click();
+
+                myInput.addEventListener('change',function(e){
+                    const img = new Image();
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+
+                    reader.readAsDataURL(file)
+                    reader.onloadend = (e) =>{
+                        img.src = e.target.result;
+                        img.className = 'profileEdit'
+
+                        img.onload = () => {
+                            const width = img.width;
+                            const height = img.height;
+
+                            // 가로 800px, 세로 600px 이하로 제한
+                            if (width > 300 || height > 300) {
+                                alert('이미지의 크기는 300x300 픽셀을 초과할 수 없습니다.');
+                                myInput.value = ''; // 입력값 초기화
+                            }else{
+                                mybutton.innerHTML='';
+                                mybutton.appendChild(img); 
+                            }
+                        }
+                    }
+                }
+            )}
+
+            function timer_start(){               
+                // 인증코드 유효성 true
+                code_valid = true;
+                // 현재 발송 시간 초기화
+                current_time = 0
+                // 20초
+                let count = 20
+
+                timer.innerHTML = "00:20"
+                    // 1초마다 실행
+                    timer_thread = setInterval(function () {
+                        
+                        minutes = parseInt(count / 60, 10);
+                        seconds = parseInt(count % 60, 10);
+
+                        minutes = minutes < 10 ? "0" + minutes : minutes;
+                        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+
+                        timer.innerHTML  = minutes + ":" + seconds;
+
+                        // alert(minutes + ":" + seconds);
+                        
+                        // 타이머 끝
+                        if (--count < 0) {
+                            timer_stop();
+                            timer.textContent = "시간초과"
+                            // code msg 보임
+                            code_msg.style.display = "block";
+                            // code msg "인증코드가 만료되었습니다."
+                            code_msg.textContent = "인증코드가 만료되었습니다.";
+                            // 코드 색상 비정상
+                            code_msg.style.color = msg_err_color;
+                        }
+
+                        current_time++
+
+                    }, 1000);
+                } 
+                // 타이머 종료
+                function timer_stop(){
+                    // 타이머 종료
+                    clearInterval(timer_thread)
+                    // 유효시간 만료
+                    code_valid = false
+                }
+        </script>
+    </body>
+</html>

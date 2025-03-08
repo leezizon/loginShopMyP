@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../stylesheets/assets/dist/css/bootstrap.min.css" rel="stylesheet">   
+  <link rel="stylesheet" href="css/new_style.css">
+  <title>상품 판매 게시판</title>
+</head>
+<body>
+  {% include "header.html" %}
+    <main>
+      <div class="menuOut" style="display: flex; height: 700px;    align-items: center;
+    justify-content: space-around; margin-top: 50px;">
+        <div class = 'menu' id ='table-container'>
+        </div>
+        <div class = 'sideWrap'>
+          <div class = 'side'>
+            <div class = 'screenContainer'>
+              <div class = 'listContainer' id = "listContainer">
+    
+              </div>
+              <div class="resultContainer" onclick="buyAll()">
+                <div>
+                  <div>현재잔액 : </div>
+                  <div id ="myMoney">불러온자산이 없어요</div>
+                  <div >결제 후 잔액 : </div>
+                  <div id ="myMoneyResult">0</div>
+                </div>
+                <div class="resultBuy">
+                  <div style="display: flex; align-items: center;">
+                    <div id="finalPrice">4000</div>원
+                  </div> 
+                  <div>구매</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="sideStand">
+          </div>
+          <div class="explain" id="explain">
+            설명입니다
+          </div>
+        </div>
+      </div>
+        <div class="MWhell">
+          <div id="leftPd">◀</div><div id="rightPd">▶</div>
+        </div>
+    </main>
+</body>
+  <script>
+    let Mstate = false;
+    if(window.innerWidth>769){
+      Mstate=false;
+    }else{
+      Mstate=true;
+    }
+
+    let pdIndex = 0; //상품리스트첫자리idx
+
+    //현재 세계관확인
+    let currentWorld={world:'spl'};
+
+    // fetch('/s/myProfile') // '/query' 엔드포인트를 호출
+    // .then(response => response.json())
+    // .then(data => {
+    //   currentWorld.world = data.world;
+      selectPd(pdIndex,currentWorld.world);
+    // })
+    // .catch(error => {
+    //   console.error('데이터 가져오기 오류:', error);
+    // });
+
+
+    //내 잔액조회
+    fetch('/shop/inShopMyMoney') // '/query' 엔드포인트를 호출
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById("myMoney").innerText = data.money;
+    })
+    .catch(error => {
+        console.error('데이터 가져오기 오류:', error);
+    });
+
+
+    //상점조회
+    let toBuyPds = [];
+
+    window.addEventListener('resize', function() {
+      if(window.innerWidth>769){
+        Mstate=false;
+      }else{
+        Mstate=true;
+      }
+    });
+
+    let listIndex = 0; //목록리스트넘버링
+    window.addEventListener("wheel", function(event) {
+      if (!Mstate && event.deltaY > 0) {
+        pdIndex += 3
+        selectPd(pdIndex,currentWorld.world);
+      }else if(!Mstate){
+        pdIndex -= 3
+        selectPd(pdIndex,currentWorld.world);
+      }
+    })
+
+    document.getElementById("leftPd").addEventListener("click",function(){
+      pdIndex -= 6
+      selectPd(pdIndex,currentWorld.world);
+    });
+
+    document.getElementById("rightPd").addEventListener("click",function(){
+      pdIndex += 6
+      selectPd(pdIndex,currentWorld.world);
+    });
+
+    function selectPd(pdIdx,world){
+      fetch('/shop/leePd2?param1='+pdIdx+'&param2='+world) // '/query' 엔드포인트를 호출
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('table-container').innerHTML = data;
+
+        //설명 버튼 클릭시 해당 제품 설명
+        document.querySelectorAll(".custom-button2").forEach(function(div) {
+          div.addEventListener("click", function() {
+            const pdEx = div.getElementsByClassName("hiddenField")[0].value;
+
+            var explainElement = document.getElementById("explain");
+            explainElement.innerText = pdEx;
+          })
+        })
+
+        //담기 버튼 클릭시 목록에 담김
+        document.querySelectorAll(".custom-button").forEach(function(div) {
+          div.addEventListener("click", function() {
+            const pdId = div.getAttribute("id").replace('getPd', '');
+            const pdPrice = div.getElementsByClassName("hiddenField")[0].value;
+            listIndex += 1;
+            toBuyPds.push({listIndex: listIndex,pdId : pdId, count : 1});//살 목록에 상품아이디 넣기
+            console.log(toBuyPds);
+            var parentElement = document.getElementById("listContainer");
+            parentElement.insertAdjacentHTML("beforeend", 
+                `<div class="lists" id="` +"div"+listIndex+ `">
+                    <div class="vertical-bar"></div>
+                    <div class="list"><img src="https://dancing-kataifi-ac965e.netlify.app/shop/${currentWorld.world}/product/${pdId}.png" alt="상품 이미지"></div>
+                    <div class="vertical-bar"></div>
+                    <div class="price" style="width: 150px;" id="price`+listIndex+`">`+pdPrice+`</div>
+                    <div class="vertical-bar"></div>
+                    <div class="list">
+                      <div class = "upCount" id = "up`+listIndex+`" data-id="up`+listIndex+`">▲</div>
+                      <div class="countPd" id="count`+listIndex+`">1</div>
+                      <div class = "downCount" id = "down`+listIndex+`" data-id="down`+listIndex+`">▼</div>  
+                    </div>
+                    <div class="vertical-bar"></div>
+                    <div class="delList" data-id = "`+"div"+listIndex+`">x</div>
+                    <div class="vertical-bar"></div>
+                </div>`);
+
+            //목록 삭제시 목록에 삭제
+            document.querySelectorAll(".delList").forEach(function(div) {
+              div.addEventListener("click", function() {
+                var divIdToRemove = div.getAttribute("data-id");
+                var divToRemove = document.getElementById(divIdToRemove);
+                if(divToRemove){
+
+                  // 리스트를 제거합니다.
+                  var divIdToRemoveIndex = divIdToRemove.replace('div', '');
+                  const listLenth = document.getElementsByClassName("lists").length;
+                  for(let i=0; i < listLenth; i++){
+                    if(toBuyPds[i].listIndex == divIdToRemoveIndex){
+                      toBuyPds.splice(i,1);
+                      console.log(toBuyPds);
+                      break;
+                    }
+                  }
+
+                  // div를 제거합니다.
+                  divToRemove.parentNode.removeChild(divToRemove);
+
+                  getResult();
+                }
+              });
+            });
+
+            //물건마다 카운트 증가
+            document.querySelector("#up"+listIndex).addEventListener("click", function(event) {
+              var divIdToCount = event.target.id.replace('up', '');
+              var countElement = document.getElementById("count"+divIdToCount);
+              var count = parseInt(countElement.innerText)+1;
+              countElement.innerText = count;
+
+              const listLenth = document.getElementsByClassName("lists").length;
+              for(let i=0; i < listLenth; i++){
+                if(toBuyPds[i].listIndex == divIdToCount){
+                  toBuyPds[i].count = count;
+                  console.log(toBuyPds[i].count);
+                }
+              }
+              //   toBuyPds
+
+                getResult();
+              });
+
+            //물건마다 카운트 감소
+            document.querySelector("#down"+listIndex).addEventListener("click", function(event) {
+              var divIdToCount = event.target.id.replace('down', '');
+              var countElement = document.getElementById("count"+divIdToCount);
+                var count = parseInt(countElement.innerText)-1;
+                countElement.innerText = count;
+
+                const listLenth = document.getElementsByClassName("lists").length;
+                for(let i=0; i < listLenth; i++){
+                  if(toBuyPds[i].listIndex == divIdToCount){
+                    toBuyPds[i].count = count;
+                    console.log(toBuyPds[i].count);
+                  }
+                }
+
+                getResult();
+            });
+
+            getResult();
+
+            //물건정산
+            function getResult(){
+              let myMoney = parseInt(document.getElementById("myMoney").textContent);
+              let finalPrice = 0;
+              document.querySelectorAll(".lists").forEach(function(div) {
+                const count = parseInt(div.getElementsByClassName("countPd")[0].textContent);
+                finalPrice += parseInt(div.getElementsByClassName("price")[0].textContent.replace('원', '')) * count;
+              });
+
+              var finalPriceElement = document.getElementById("finalPrice");
+              var myMoneyResultElement = document.getElementById("myMoneyResult");
+              finalPriceElement.innerText = finalPrice;
+              myMoneyResultElement.innerText = myMoney - finalPrice;
+
+              console.log(finalPrice);
+            };
+
+          });
+        });
+      })
+      .catch(error => {
+        console.error('데이터 가져오기 오류:', error);
+      });
+    }
+  
+    //정해진 물건구매
+    function buyAll(){
+      postData(toBuyPds);
+    }
+
+
+    //상점구매
+    function postData(PdId) {
+      var MoneyNone = 0;
+      const jsonData = JSON.stringify({ PdId , world : currentWorld.world});
+      fetch('/shop/save', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: jsonData
+      })
+      .then(response => response.text())
+      .then(data => {
+        const state = JSON.parse(data);
+        if(state == "T"){
+          alert('구매성공');
+          location.href="/shop"
+          MoneyNone = 1;
+        }else if(state == "F"){
+          alert('로그인해주세요');
+        }else{
+          alert('돈이 없어요!!!');
+        }
+      })
+      .catch(error => {
+        console.error('데이터 삽입 오류:', error);
+      });
+    // setTimeout(function() {
+    //   if(MoneyNone == 0){
+    //     //alert('돈이없어요!!');
+    //   }
+    // },100)
+    }
+
+    
+
+
+    // function asas(){
+    //   const asd = 'asd'
+    //   const jsonData = JSON.stringify({ asd });
+    //   fetch('/test', {
+    //         method: 'POST',
+    //         headers: {
+    //         'Content-Type': 'application/json'
+    //         },
+    //         body: jsonData
+    //   })
+    //   .catch(error => {
+    //     console.error('데이터 삽입 오류:', error);
+    //   });
+    // }
+
+  </script>
+</html>

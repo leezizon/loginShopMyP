@@ -1,0 +1,31 @@
+<header>
+    <nav>
+        <div class="user-options" id="userSState">
+            <a href="/logout">로그인</a> <!-- 프로필 사진 -->
+        </div>
+        <!-- <div class="user-options" id="userSState">
+            <a href="/logout">로그인</a>
+        </div> -->
+        <div class="nav-content">
+            <div class="Nmain">
+                <a href="/myPage">마이페이지</a>
+                <a href="/shop">상점</a>
+            </div>
+        </div>
+        <div class="user-options">
+
+        </div>
+        <button class="menu-toggle" id="menuToggle">&#9776;</button> <!-- 햄버거 메뉴 아이콘 -->
+    </nav>
+    <div class="nav-content2">
+        <div class="Nmain">
+            <a href="/myPage">마이페이지</a>
+            <a href="/shop">상점</a>
+        </div>
+    </div>
+</header>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="../js/header.js"></script>
+<script>document.getElementById("menuToggle").addEventListener("click", function() {
+    document.querySelector(".nav-content2").classList.toggle("active");
+});</script>

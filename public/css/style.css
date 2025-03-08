@@ -1,0 +1,183 @@
+::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background-color:#f2ebe6;
+    margin: 0;
+    padding: 0;
+}
+
+/* 기본 스타일 */
+header {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    background-color: rgb(147, 44, 20);
+    color: #fff;
+    padding: 10px;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.profile-pic img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.nav-content {
+    justify-content: center;
+    display: flex;
+    flex-direction: row;
+    width: 80%;
+    background-color: rgb(147, 44, 20);
+}
+
+.nav-content2{
+    display: none;
+}
+
+
+.Nmain a{
+    padding: 10px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.menu-toggle {
+    display: none;
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+
+.user-options {
+    height: 34px;
+    width: 20%;
+    display: flex;
+    /* align-items: center; */
+    margin-right: auto;
+}
+
+/* 모바일 스타일 */
+@media (max-width: 768px) {
+    .menu-toggle {
+        margin-right: 20px;
+        display: block;
+    }
+
+    .profile-pic {
+        margin-right: auto;
+    }
+
+    .nav-content {
+        display: none;
+    }
+
+    .nav-content2.active {
+        border-radius: 10px;
+        padding: 10px;
+        background-color: rgb(147, 44, 20);
+        display: flex;
+        top: 70px;
+        right: 10px;
+        position: absolute;
+    }
+
+    .user-options {
+        width: 30%;
+    }
+    .Nmain a {
+        color: #0c3056;
+        border-radius: 10px;
+        margin: 5px;
+        background-color: #fff;
+        padding: 10px;
+        text-align: center;
+        display: block;
+    }
+
+    .user-options a {
+        margin: 5px;
+        margin-bottom: 10px;
+    }
+}
+
+.user-options a, .user-options button {
+    margin-left: 10px;
+    color: #fff;
+    text-decoration: none;
+    background-color: #e74c3c;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.user-options button {
+    background-color: #e74c3c;
+}
+
+
+main {
+    max-width: 800px;
+    width: 90%;
+    margin: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+.product {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+img {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+.product-details {
+    flex: 1;
+}
+
+h2 {
+    font-size: 24px;
+    margin: 0;
+    color: #333;
+}
+
+p {
+    color: #666;
+}
+
+.price {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+footer {
+    background-color: #3498db;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+}

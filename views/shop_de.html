@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/style.css">
+  <title>상품 판매 게시판</title>
+</head>
+<body>
+  {% include "header.html" %}
+    <main id ='table-container'>
+        <!-- 다른 상품들을 여기에 추가 -->
+    </main>
+</body>
+  <script>
+    //상점조회
+    fetch('/leePd') // '/query' 엔드포인트를 호출
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('table-container').innerHTML = data;
+    })
+    .catch(error => {
+      console.error('데이터 가져오기 오류:', error);
+    });
+
+    //상점구매
+    function postData(PdId) {
+      var MoneyNone = 0;
+      const jsonData = JSON.stringify({ PdId });
+      fetch('/save', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: jsonData
+      })
+      .then(response => response.text())
+      .then(data => {
+        console.log(data);
+        if(!data == ''){
+          alert('구매성공');
+          MoneyNone = 1;
+        }
+      })
+      .catch(error => {
+        console.error('데이터 삽입 오류:', error);
+      });
+
+    setTimeout(function() {
+      if(MoneyNone == 0){
+        alert('돈이없어요!!');
+      }
+    },100)
+    }
+
+    
+
+
+    function asas(){
+      const asd = 'asd'
+      const jsonData = JSON.stringify({ asd });
+      fetch('/test', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: jsonData
+      })
+      .catch(error => {
+        console.error('데이터 삽입 오류:', error);
+      });
+    }
+
+  </script>
+</html>

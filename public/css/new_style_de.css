@@ -1,0 +1,283 @@
+/* 로컬 폰트를 사용하는 방법 */
+@font-face {
+    font-family: 'MyCustomFont';
+    src: url('/font/SPLATOON.ttf') format('truetype');
+}
+
+body {
+    font-family: 'MyCustomFont', sans-serif;
+    background-color:#f2ebe6;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px 0;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+}
+
+nav li {
+    display: inline;
+    margin: 0 10px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+}
+
+
+.user-options {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.custom-button {
+    font-family: 'MyCustomFont', sans-serif;
+    background-color: rgb(147, 44, 20);
+    color: #fff; /* 텍스트 색상을 흰색으로 설정 */
+    font-size: 18px;
+    padding: 5px 20px; /* 내부 여백 설정 */
+    border: 4px solid #eba84a; /* 겉 테두리 스타일 및 색상 설정 */
+    border-radius: 15px; /* 테두리의 꼭지점을 둥글게 만듭니다. */
+    cursor: pointer; /* 커서 스타일을 포인터로 변경하여 클릭 가능한 것임을 나타냅니다. */
+    width: 100px;
+    margin-left: 5px;
+    margin-bottom: 20px;
+  }
+
+  .custom-button2 {
+    font-family: 'MyCustomFont', sans-serif;
+    background-color: rgb(147, 44, 20);
+    color: #fff; /* 텍스트 색상을 흰색으로 설정 */
+    font-size: 18px;
+    padding: 5px 20px; /* 내부 여백 설정 */
+    border: 4px solid #eba84a; /* 겉 테두리 스타일 및 색상 설정 */
+    border-radius: 15px; /* 테두리의 꼭지점을 둥글게 만듭니다. */
+    cursor: pointer; /* 커서 스타일을 포인터로 변경하여 클릭 가능한 것임을 나타냅니다. */
+    width: 100px;
+    margin-left: 5px;
+    margin-bottom: 20px;
+  }
+
+.user-options a, .user-options button {
+    margin-left: 10px;
+    color: #fff;
+    text-decoration: none;
+    background-color: #3498db;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.user-options button {
+    background-color: #e74c3c;
+}
+
+
+main {
+    display: flex;
+    min-width: 1320px;
+    max-width: 1320px;
+    
+    height: 100vh;
+    margin: auto;
+    background-color: #eba84a;
+    align-items: center;
+}
+
+.menu {
+    /* max-width: 800px; */
+    /* margin: 20px auto; */
+    /* padding: 20px; */
+    border: 30px solid #502416;
+    border-radius: 10px;
+    background-color: #0c3056;
+
+    margin: 50px;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    /* justify-content: space-around; */
+    overflow-y: auto; /* 세로 스크롤 활성화 */
+    min-width: 800px;
+    max-width: 800px;
+    min-height: 800px; /* 원하는 최소 높이 설정 */
+    max-height: 800px; /* 원하는 최대 높이 설정 */
+}
+
+.product .product-detail {
+    color: #0c3056;
+    font-size: 18px;
+    padding: 10px;
+    /* margin-bottom: 20px; */
+    display: flex;
+    /* align-items: center; */
+    flex-direction: column;
+    align-items: center;
+    background-color:#f2ebe6;
+    border-radius: 10px;
+    width: 200px; /* 3 개의 열을 가지도록 설정 */
+    height: 200px;
+    overflow: hidden;
+    margin-top: 30px;
+    margin-bottom: 25px;
+    margin-left: 33px;
+    justify-content: space-around;
+}
+
+.product .custom-buttons {
+    margin-left: 35px;
+}
+
+.horizontal-line {
+    width: 100%;
+    height: 10px; /* 높이 조절 */
+    background-color: #2A5786;
+    border-radius: 5px; /* 둥근 테두리 처리 */
+    margin: 15px;
+  }
+
+img {
+    width: 80%;
+    height: 80%;
+    display: block;
+}
+
+.side {
+    background-color:#f2ebe6;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 600px;
+    width:300px;
+    margin-right: 50px;
+}
+
+.sideStand {
+    background-color : #c3c3c3;;
+    height: 200px;
+    width: 20px;
+    margin-right: 50px;
+}
+
+.explain{
+    position: fixed;
+
+    background-color:#f2ebe6;
+    border-radius: 10px;
+    overflow: auto;
+    width: 260px;
+    height: 110px;
+    margin-right: 50px;
+    margin-top: 650px;
+    padding: 20px;
+}
+
+.screenContainer {
+    background-color: #0c3056;
+    border-radius: 5px;
+    width: 90%; 
+    margin: 5%;
+    height: 500px;
+}
+
+.listContainer {
+    overflow: hidden;
+    width: 90%; 
+    height: 70%;
+    display: flow-root;
+    margin: 5%;
+}
+
+.lists {
+    background-color: #f2ebe6;
+    border-radius: 5px;
+    width: 94%;
+    height: 40px;
+    margin-top: 20px;
+    padding: 3%;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lists .list{
+    width: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.lists .delList{
+    width: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.vertical-bar {
+    height: 100%; /* 세로 길이를 화면의 높이로 조절 */
+    width: 2px; /* 너비 조절 */
+    background-color: #c3c3c3; /* 색상 지정 */
+    border-radius: 10px; /* 둥근 테두리 처리 */
+  }
+
+.resultContainer {
+    display:flex;
+    color:aliceblue;
+    background-color: #011326;
+    border-radius: 5px;
+    width: 80%; 
+    padding: 5%;
+    margin: 5%;
+    height: 20%;
+    justify-content: space-between;
+}
+
+.resultContainer .resultBuy {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: brown;
+    border-radius: 5px;
+    color:aliceblue;
+    padding: 5%;
+    height: 80%;
+    width: 40%;
+}
+
+.product-details {
+    flex: 1;
+}
+
+h2 {
+    font-size: 24px;
+    margin: 0;
+    color: #333;
+}
+
+p {
+    color: #666;
+}
+
+.price {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+footer {
+    background-color: #3498db;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+}
