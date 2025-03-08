@@ -256,28 +256,7 @@
         )}
 
         document.getElementById('myForm').addEventListener('submit', function(event) {
-            event.preventDefault();
 
-            const formData = new FormData(this);
-
-            fetch('/myPage/editProfile', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data=>{
-                console.log(data.val);
-                if(data.val){
-                    alert('성공적으로 변경 되었습니다.');
-                    location.href = '/myPage';
-                }else{
-                    alert('오류 발생');
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                alert('Form submission failed!');
-            });
         })
     </script>
 </body>

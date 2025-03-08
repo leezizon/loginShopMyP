@@ -8,18 +8,7 @@ var router = express.Router();
 const passport = require('passport');
 const expressSession = require('express-session');
 const LocalStrategy = require('passport-local').Strategy;
-const NaverStrategy = require('passport-naver').Strategy;
 const bodyParser = require('body-parser');
-
-const { createClient } = require('@supabase/supabase-js');
-
-// Supabase 클라이언트 설정
-const supabaseUrl = 'https://ovmroczkeblnuseyaosj.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92bXJvY3prZWJsbnVzZXlhb3NqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNzg0NzUwMSwiZXhwIjoyMDQzNDIzNTAxfQ.Mt8ncAzt5L2rlGmqNdjmxYAv606J4agH6rDgljlzPKI';
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-//고유세션아이디생성을 위한 uuid
-const { v4: uuidv4 } = require('uuid');
 
 //세션키 사용,설정
 router.use(expressSession(
