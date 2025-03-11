@@ -175,15 +175,6 @@
         .then(response => response.json())
         .then(data => {
             document.getElementById('profile').innerHTML = `
-                <div class="profileIn" style="display:flex;">
-                    <div>
-                        <div id="profileImg" style="margin:50px;">
-
-                        </div>
-                        <div id="chaImg" style="display:flex;">
-                            
-                        </div>
-                    </div>
                     <div>
                         <section>
                             <div style="display:flex;"><h2>내 프로필</h2><button onclick="editProfile()" style="margin-left:10px">프로필수정</button></div>
@@ -192,23 +183,7 @@
                             <p>소개: ${data.intro}</p>
                         </section>
                     </div>
-                </div>
-                <div style="width:300px; margin:auto;">
-                    ${data.ch}
-                    <div class="chaList" onclick="location.href ='/s/simulChaEditPage/insert';">+</div>
-                </div>
             `;
-            document.querySelectorAll(".chaListImg").forEach(div=>{
-                let chaListImg = new Image;
-                const { data: publicURL } = supauser.storage.from('palyList').getPublicUrl(`simulGame/chara/${div.id}/token.png`);
-                chaListImg.src = publicURL.publicUrl;
-                div.appendChild(chaListImg);
-            })
-            document.getElementById('profileImg').appendChild(currentPImg);
-            let clonedCurrentPImg = currentPImg.cloneNode(true);
-            clonedCurrentPImg.className="profileEdit";
-            mybutton.appendChild(clonedCurrentPImg);
-            document.getElementById('table-container').innerHTML = data.pd;
         })
         .catch(error => {
           console.error('데이터 가져오기 오류:', error);
@@ -224,39 +199,39 @@
             document.getElementById("pop").style.display = 'none';
         }
 
-        function onClickUpload() {
-            let myInput = document.getElementById("my-input");
-            myInput.click();
+        // function onClickUpload() {
+        //     let myInput = document.getElementById("my-input");
+        //     myInput.click();
 
-            myInput.addEventListener('change',function(e){
-                const img = new Image();
-                const file = e.target.files[0];
-                const reader = new FileReader();
+        //     myInput.addEventListener('change',function(e){
+        //         const img = new Image();
+        //         const file = e.target.files[0];
+        //         const reader = new FileReader();
 
-                reader.readAsDataURL(file)
-                reader.onloadend = (e) =>{
-                    img.src = e.target.result;
-                    img.className = 'profileEdit'
+        //         reader.readAsDataURL(file)
+        //         reader.onloadend = (e) =>{
+        //             img.src = e.target.result;
+        //             img.className = 'profileEdit'
 
-                    img.onload = () => {
-                        const width = img.width;
-                        const height = img.height;
+        //             img.onload = () => {
+        //                 const width = img.width;
+        //                 const height = img.height;
 
-                        // 가로 800px, 세로 600px 이하로 제한
-                        if (width > 300 || height > 300) {
-                            alert('이미지의 크기는 300x300 픽셀을 초과할 수 없습니다.');
-                            myInput.value = ''; // 입력값 초기화
-                        }else{
-                            mybutton.innerHTML='';
-                            mybutton.appendChild(img); 
-                        }
-                    }
-                }
-            }
-        )}
+        //                 // 가로 800px, 세로 600px 이하로 제한
+        //                 if (width > 300 || height > 300) {
+        //                     alert('이미지의 크기는 300x300 픽셀을 초과할 수 없습니다.');
+        //                     myInput.value = ''; // 입력값 초기화
+        //                 }else{
+        //                     mybutton.innerHTML='';
+        //                     mybutton.appendChild(img); 
+        //                 }
+        //             }
+        //         }
+        //     }
+        // )}
 
         document.getElementById('myForm').addEventListener('submit', function(event) {
-
+            alert('asdsad');
         })
     </script>
 </body>
