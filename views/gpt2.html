@@ -23,18 +23,15 @@
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
         backdrop-filter: blur(10px);
         position: relative;
+        width: 300px;
     }
     .user-icon {
-        width: 80px;
-        height: 80px;
-        background: #e57373;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 40px;
-        color: white;
-        margin: 0 auto 20px;
+      width: 80px;
+      height: 80px;
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
     }
     .form-group {
         margin-bottom: 15px;
@@ -58,7 +55,7 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        margin: 10px;
+        margin: 10px 0;
     }
 
     .button:hover {
@@ -81,20 +78,19 @@
 </head>
 <body>
     <div class="login-container">
-        <h1>로그인</h1>
+        <img src="/views/images/user.png" alt="User Icon" class="user-icon">
         <form id="login-form" method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="email">사용자 이메일</label>
-                <input type="text" id="email" name="username" required>
+                <input type="text" id="email" name="username" placeholder="Username" required>
             </div>
             <div class="form-group">
-                <label for="password">비밀번호</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" placeholder="Password" required>
             </div>
-            <div style="display: flex; justify-content: center;">
-                <button class="button" form="login-form" type="submit">로그인</button>
+            <button class="button" form="login-form" type="submit">LOGIN</button>
+            <div class="links">
+                <label><input type="checkbox"> Remember me</label>
+                <a href="/signUp">Join the membership</a>
             </div>
-            <a style="margin-right: 10px;" href="/signUp">회원가입</a>
         </form>
     </div>
     <script>
