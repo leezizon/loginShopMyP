@@ -117,54 +117,6 @@
             </ul>
         </section>
     </main>
-    <!-- 프로필 수정 -->
-    <div id="pop" style="position: absolute; z-index: 200; display: none; justify-content: center; min-width: 100vw;">
-        <div style="background-color: black; top:0px; opacity: 50%; position: fixed; min-width: 100vw; height: 100vh;"></div>
-        <div class="popP">
-            <div>
-                <div id ="XBtn" class="closeBtn">x</div>
-            </div> 
-            <form method="POST" id="myForm" enctype="multipart/form-data">
-                <div class="inGame" >
-                    <div class="row g-3" style="background-color: white;margin-top: 10px; padding: 30px; border-radius: 10px;">
-                        <input id="my-input" type="file" style="display: none;" name="profileImg"/>
-                        <div style="display: flex; justify-content: center;">
-                            <div id="my-button" onclick="onClickUpload()" style="overflow: hidden; border-radius: 100%; background-color: black; opacity: 50%; width: 300px; display: flex; justify-content: center; align-items: center; margin-bottom: 30px;">
-                                <div style="position: absolute; color: white;">300:300 이하 사이즈</div>
-                            </div>
-                        </div>
-                        <div class="col-2">
-                            <label  class="form-label">이름</label>
-                        </div>
-                        <div class="col-10">
-                            <input type="text" class="form-control" name ="name" placeholder="이름">
-                        </div>
-                        <div class="col-2">
-                            <label  class="form-label">소개</label>
-                        </div>
-                        <div class="col-10">
-                            <input type="text" class="form-control" name ="intro" placeholder="비워도 괜찮음">
-                        </div>
-                    </div>
-                    <div style="width: 100%; justify-content:center;" class="user-options">
-                        <button form="myForm" style=" height: 50px; margin:20px; font-size: 20px; width: 120px;">저장</button>
-                    </div>
-                </div>     
-            </form>
-        </div>
-    </div>
-    <!-- 캐릭터리스트 -->
-    <div id="pop2" style="position: absolute; z-index: 200; display: none; justify-content: center; min-width: 100vw;">
-        <div style="background-color: black; top:0px; opacity: 50%; position: fixed; min-width: 100vw; height: 100vh;"></div>
-        <div class="popP">
-            <div>
-                <div id ="XBtn2" class="closeBtn">x</div>
-            </div> 
-            <div id="charaGallery" style="height: 100%;">
-
-            </div>
-        </div>
-    </div>
     <script>
         let newPImg = new Image;
 
@@ -174,89 +126,22 @@
         fetch('/myPage/myPagePd') // '/query' 엔드포인트를 호출
         .then(response => response.json())
         .then(data => {
-            document.getElementById('profile').innerHTML = `
-                <div class="profileIn" style="display:flex;">
-                    <div>
-                        <div id="profileImg" style="margin:50px;">
 
-                        </div>
-                        <div id="chaImg" style="display:flex;">
-                            
-                        </div>
-                    </div>
-                    <div>
-                        <section>
-                            <div style="display:flex;"><h2>내 프로필</h2><button onclick="editProfile()" style="margin-left:10px">프로필수정</button></div>
-                            <p>이름: ${data.name}</p>
-                            <p>이메일: ${data.email}</p>
-                            <p>소개: ${data.intro}</p>
-                        </section>
-                    </div>
-                </div>
-                <div style="width:300px; margin:auto;">
-                    ${data.ch}
-                    <div class="chaList" onclick="location.href ='/s/simulChaEditPage/insert';">+</div>
-                </div>
-            `;
-            document.querySelectorAll(".chaListImg").forEach(div=>{
-                let chaListImg = new Image;
-                const { data: publicURL } = supauser.storage.from('palyList').getPublicUrl(`simulGame/chara/${div.id}/token.png`);
-                chaListImg.src = publicURL.publicUrl;
-                div.appendChild(chaListImg);
-            })
-            document.getElementById('profileImg').appendChild(currentPImg);
-            let clonedCurrentPImg = currentPImg.cloneNode(true);
-            clonedCurrentPImg.className="profileEdit";
-            mybutton.appendChild(clonedCurrentPImg);
+
+            const divInner = `<div>
+                    <p>이름: ${data.name}</p>
+                    <p>이메일: ${data.email}</p>
+                    <p>소개: ${data.intro}</p>
+                </div>`;
+
+            document.getElementById('profile').innerHTML = divInner;
+
             document.getElementById('table-container').innerHTML = data.pd;
-        })
-        .catch(error => {
-          console.error('데이터 가져오기 오류:', error);
         });
 
-        function editProfile(){
-            document.getElementById("pop").style.display = 'flex';
-        }
-
-        document.getElementById('XBtn').addEventListener("click",togglePage);
-
-        function togglePage(){
-            document.getElementById("pop").style.display = 'none';
-        }
-
-        function onClickUpload() {
-            let myInput = document.getElementById("my-input");
-            myInput.click();
-
-            myInput.addEventListener('change',function(e){
-                const img = new Image();
-                const file = e.target.files[0];
-                const reader = new FileReader();
-
-                reader.readAsDataURL(file)
-                reader.onloadend = (e) =>{
-                    img.src = e.target.result;
-                    img.className = 'profileEdit'
-
-                    img.onload = () => {
-                        const width = img.width;
-                        const height = img.height;
-
-                        // 가로 800px, 세로 600px 이하로 제한
-                        if (width > 300 || height > 300) {
-                            alert('이미지의 크기는 300x300 픽셀을 초과할 수 없습니다.');
-                            myInput.value = ''; // 입력값 초기화
-                        }else{
-                            mybutton.innerHTML='';
-                            mybutton.appendChild(img); 
-                        }
-                    }
-                }
-            }
-        )}
-
+        
         document.getElementById('myForm').addEventListener('submit', function(event) {
-
+            alert('폼을 넘겼어요');
         })
     </script>
 </body>
