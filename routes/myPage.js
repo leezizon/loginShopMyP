@@ -81,12 +81,18 @@ router.get('/myPagePd',ensureAuthenticated, (req, res) => {
 
 
       db.all('SELECT * FROM assets WHERE assetsWithUserId = ? AND chaKey = ?' ,[req.user.key, useCha.key], (err, rows2) => {
+        var products ={};
         if (err) {
           console.error("Database error:", err);
           return;
         }
         let tableHtml = '';
         if(rows2){
+          products = rows2.map(row => ({
+            image: `https://dancing-kataifi-ac965e.netlify.app/shop/${row.worldKey}/product/${row.PdId}.png`,
+            name: row.PdNm,
+            description: "상품설명상품설명상품설명상품설명상품설명상품설명상품설명."
+          }));
           rows2.forEach((row) => {
             tableHtml += `
             <section class="product">
@@ -101,8 +107,9 @@ router.get('/myPagePd',ensureAuthenticated, (req, res) => {
           });
         }
 
-        res.send({ch:chaHtml, pd : tableHtml, chaId: req.user.id, name:req.user.name, email:req.user.email, intro:req.user.introduction});
-      
+        // res.send({ch:chaHtml, pd : tableHtml, chaId: req.user.id, name:req.user.name, email:req.user.email, intro:req.user.introduction});
+        res.send({ch:chaHtml, pd : products, chaId: req.user.id, name:req.user.name, email:req.user.email, intro:req.user.introduction});
+        
         db.close((err) => {
           if (err) {
             console.error('데이터베이스 연결 종료 중 오류 발생:', err.message);
