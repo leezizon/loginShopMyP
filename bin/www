@@ -32,15 +32,8 @@ var guestList = [];
 var userList = [];
 var roomList = [];
 
-var battleUserList = [[],[],[]];//배틀유저 배정(2명까지만 허용임)
-var battleSet = [{player1: null, player2: null},{player1: null, player2: null},{player1: null, player2: null}];
-
 var userSnList = [0,0,0]; //sn번호배정
 var userTokenList = [0,0,0]; //토큰이미지배정
-var uploadAuthList = ['youRN','youRN','youRN'];//각 방마다 이미지 업로드 권한을 가진 
-
-
-
 
 
 
@@ -51,6 +44,8 @@ io.on("connection",(socket)=>{
   socket.onAny((event)=>{
     console.log(event);
   });
+
+  //프론트에서 방 참가 이후 백에서 처리
   socket.on("room", (roomName,profiliImg) =>{
     // close the database connection
     socket.join(roomName);
@@ -61,13 +56,14 @@ io.on("connection",(socket)=>{
       guestList.push([]);
       userList.push([]);
     }
+
     var myRoomIdx = roomList.indexOf(roomName);
     guestList[myRoomIdx].push(socket.id);
 
     console.log(roomList);
     console.log(myRoomIdx);
     console.log(profiliImg);
-
+    //방에 참여한 유저들에게 방에 참여한 유저들의 리스트를 보내준다
     socket.emit("guestList",guestList[myRoomIdx],socket.id,userList[myRoomIdx],userSnList[myRoomIdx],userTokenList[myRoomIdx],profiliImg);
     userSnList[myRoomIdx] = userSnList[myRoomIdx] + 1;
     if(userTokenList[myRoomIdx] < 5){
@@ -76,138 +72,28 @@ io.on("connection",(socket)=>{
       userTokenList[myRoomIdx] = 0;
     }
   
-
+    //프론트에서 방에 있는 모든 사람들의 리스트를 받음
     socket.on("updateGuestListOne", (List) =>{
-      userList[myRoomIdx] = List;
-      io.to(roomName).emit("updateGuestList", userList[myRoomIdx], 'plate', battleUserList[myRoomIdx]);
+      userList[myRoomIdx] = List;//방에 있는 유저들의 리스트 업데이트
+      io.to(roomName).emit("updateGuestList", userList[myRoomIdx]);//다시 프론트로 유저리스트 보내줌
     });
   
-    socket.on("updateGuestList", (userP,x,y) =>{
-      console.log(guestList[myRoomIdx]);
-      console.log(userP);
-      for (let i = userList[myRoomIdx].length - 1; i >= 0; i--){
-        const user = userList[myRoomIdx][i];
-        if(userP.id === userList[myRoomIdx][i].id){
-            if(x != 0){
-                user.x = user.x + x;
-            }else{
-                user.y = user.y + y;
-            }
-        }
-      }
-      io.to(roomName).emit("updateGuestList", userList[myRoomIdx], 'Nplate');
-    });
-  
-    socket.on('screenB', (data) => {
-      // 클라이언트로부터 이미지를 수신하면 해당 이미지를 모든 클라이언트에게 전송합니다.
-      io.to(roomName).emit('screenF', data);
-    });
-
-    //현재 이미지 업로드 권한교체
-    socket.on('screenAuthPut', (data) => {
-      uploadAuthList[myRoomIdx] = data;
-      console.log(uploadAuthList[myRoomIdx]);
-    });
-
-    //현재 이미지 업로드 권한이 있는지 물어봄
-    socket.on('screenAuthChk', (data) => {
-      if(data == uploadAuthList[myRoomIdx]){
-        console.log('ok');
-        socket.emit("screenAuthChk", true);
-      }else{
-        socket.emit("screenAuthChk", false);
-      }
-    });
-
-    socket.on("nicB", (sentence, userMeImg) =>{
-      const user = userList[myRoomIdx].find(user => userMeImg === user.imgSn);
-      user.nicName = sentence;
-      console.log(sentence);
-      io.to(roomName).emit("nicF", sentence,userMeImg);
-    });
-
-    socket.on("profileImgB", (url, userMeImg) =>{
-      io.to(roomName).emit("profileImgF", url,userMeImg);
-    });
 
     socket.on("talkB", (sentence, userMeImg, img, nic) =>{
       io.to(roomName).emit("talkF", sentence,userMeImg,img,nic);
     });
   
-    socket.on("BscreenB", (userCode, userSn, profiliImg) =>{
-      battleUserList[myRoomIdx].push({battleUserCode:userCode, battleUserSn:userSn, profileImgSn:profiliImg});
-      io.to(roomName).emit("BscreenF", battleUserList[myRoomIdx]);
-    });
-
-    socket.on("XBscreenB", (List) =>{
-      battleUserList[myRoomIdx] = List;
-      io.to(roomName).emit("BscreenF", battleUserList[myRoomIdx]);
-    });
-
-    //가위바위보
-    socket.on("rcpResult", (rcp,user) =>{
-      // 플레이어의 이름을 기반으로 입력을 처리합니다.
-      if (battleSet[myRoomIdx].player1 && battleSet[myRoomIdx].player1.name === user) {
-        // 플레이어 1의 선택을 덮어씁니다.
-        battleSet[myRoomIdx].player1.rcp = rcp;
-      } else if (battleSet[myRoomIdx].player2 && battleSet[myRoomIdx].player2.name === user) {
-          // 플레이어 2의 선택을 덮어씁니다.
-          battleSet[myRoomIdx].player2.rcp = rcp;
-      } else {
-          // 이름에 따라 해당 플레이어의 선택을 저장합니다.
-          if (battleSet[myRoomIdx].player1 === null) {
-            battleSet[myRoomIdx].player1 = { name: user, rcp };
-          } else if (battleSet[myRoomIdx].player2 === null) {
-            battleSet[myRoomIdx].player2 = { name: user, rcp };
-          }
-      }
-      console.log(battleSet[myRoomIdx].player1);
-      console.log(battleSet[myRoomIdx].player2);
-
-      // 두 명의 선택이 모두 수신되었을 때 결과를 계산합니다.
-      if (battleSet[myRoomIdx].player1 !== null && battleSet[myRoomIdx].player2 !== null) {
-          const { name: name1, rcp: choice1 } = battleSet[myRoomIdx].player1;
-          const { name: name2, rcp: choice2 } = battleSet[myRoomIdx].player2;
-
-          // 가위바위보 결과 계산
-          let result;
-          if (choice1 === choice2) {
-              result = '무승부';
-          } else if (
-              (choice1 === 2 && choice2 === 0) || // 바위가 가위를 이김
-              (choice1 === 1 && choice2 === 2) || // 보가 바위를 이김
-              (choice1 === 0 && choice2 === 1)    // 가위가 보를 이김
-          ) {
-              result = `${name1} 승리`;
-          } else {
-              result = `${name2} 승리`;
-          }
-
-          // 결과를 각 플레이어에게 전송합니다.
-          io.to(roomName).emit("BscreenFResult", result);
-
-          console.log(result);
-          // 게임 데이터를 초기화합니다.
-          battleSet[myRoomIdx] = {
-              player1: null,
-              player2: null
-          };
-      }
-    });
-
     socket.on("disconnecting", () =>{
       if(guestList[myRoomIdx].length == 1){
-        console.log(userList[myRoomIdx].length);
-        console.log(userList[myRoomIdx]);
-        console.log(guestList[myRoomIdx]);
+        // console.log(userList[myRoomIdx].length);
+        // console.log(userList[myRoomIdx]);
+        // console.log(guestList[myRoomIdx]);
         guestList[myRoomIdx].splice(0,1);
         userList[myRoomIdx].splice(0,1);
-        battleUserList[myRoomIdx].splice(0,1);
         console.log('혼자였는데나감');
         //userList guestList 크기가 같은지 비교
         if(userList[myRoomIdx].length!=guestList[myRoomIdx].length){
           console.log('오류가 있는 방입니다, 방을 비웁니다');
-          battleUserList[myRoomIdx].splice(0);
           guestList[myRoomIdx].splice(0);
           userList[myRoomIdx].splice(0);
         }
@@ -233,7 +119,7 @@ io.on("connection",(socket)=>{
       io.to(roomName).emit("setUser",Object.keys(connectedClients));
       console.log(`게임유저 들어왓습니다~ ${roomSizeIn}명`);
     }else{
-      console.log(`방이 꽉 찻어요~`);
+      console.log(`정원초과`);
     }
 
     socket.on("sendAllS", (userInfo,stateSrc) =>{

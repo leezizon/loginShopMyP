@@ -12,6 +12,8 @@ var shopRouter = require('./routes/shop');//상점
 var myPageRouter = require('./routes/myPage');//마이페이지
 
 
+var liveRouter = require('./routes/live');//실시간 채팅
+
 var app = express();
 
 //다른 도메인에서도 api를 쓸수있도록 앱에 cors설정
@@ -42,6 +44,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/myPage',myPageRouter);
 app.use('/shop',shopRouter);
+app.use('/l', liveRouter);//실시간 라우더설정
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
