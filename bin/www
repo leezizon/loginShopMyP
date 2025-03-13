@@ -37,9 +37,6 @@ var userTokenList = [0,0,0]; //토큰이미지배정
 
 
 
-let connectedClients = {};
-
-
 io.on("connection",(socket)=>{
   socket.onAny((event)=>{
     console.log(event);
@@ -79,8 +76,8 @@ io.on("connection",(socket)=>{
     });
   
 
-    socket.on("talkB", (sentence, userMeImg, img, nic) =>{
-      io.to(roomName).emit("talkF", sentence,userMeImg,img,nic);
+    socket.on("talkB", (sentence, nic) =>{
+      io.to(roomName).emit("talkF", sentence,nic);
     });
   
     socket.on("disconnecting", () =>{
@@ -110,35 +107,6 @@ io.on("connection",(socket)=>{
 
 
   });
-
-  socket.on("otherRoom", (roomName) =>{
-    const roomSizeIn = io.sockets.adapter.rooms.get(roomName)?.size || 0;
-    if(roomSizeIn < 5){
-      socket.join(roomName);
-      connectedClients[socket.id] = socket;
-      io.to(roomName).emit("setUser",Object.keys(connectedClients));
-      console.log(`게임유저 들어왓습니다~ ${roomSizeIn}명`);
-    }else{
-      console.log(`정원초과`);
-    }
-
-    socket.on("sendAllS", (userInfo,stateSrc) =>{
-      io.to(roomName).emit('sendAllF', socket.id, userInfo, stateSrc);
-      console.log(stateSrc);
-    })
-
-    socket.on("disconnecting", () =>{
-      delete connectedClients[socket.id];
-      socket.broadcast.emit('setUser', Object.keys(connectedClients));
-      Object.keys(connectedClients).forEach(Client => {
-          console.log(connectedClients[Client].id);
-          console.log(Client);
-          console.log('------------------------------------------------');
-      });
-      const roomSizeOut = io.sockets.adapter.rooms.get(roomName)?.size || 0;
-      console.log(`방을 나갑니다${roomSizeOut}명`);
-    })
-  })
 });
 
 

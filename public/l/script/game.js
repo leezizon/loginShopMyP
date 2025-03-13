@@ -88,11 +88,11 @@ socket.on("bye",(id) =>{
 
 /////메세지처리///
 //메세지를 백엔드에서 프론트로받음
-socket.on("talkF",(sentence, userSentneceIdx, img, nic)=>{
+socket.on("talkF",(sentence, nic)=>{
     // 부모 요소 선택
     var chatElement = document.querySelectorAll('.chatLog');
     // 새로운 <div> 추가
-    chatElement[0].insertAdjacentHTML("beforeend", `<div class="display-flex"><div><img src="${img}"></div><div>${nic} :</div><div class="talk">${sentence}</div></div>`);
+    chatElement[0].insertAdjacentHTML("beforeend", `<div class="display-flex"><div>${nic} :</div><div class="talk">${sentence}</div></div>`);
 })
 
 
@@ -102,7 +102,7 @@ document.querySelector('#send').addEventListener('click',function(e){
     let sentence = sentenceElement ? sentenceElement.value : ''; // sentenceElement가 없으면 빈 문자열 반환
     sentenceElement.value = '';
     //메세지를 백엔드로 송신
-    socket.emit("talkB",sentence, null, null, userMe);
+    socket.emit("talkB",sentence, userMe);
 })
 
 document.querySelector('#sentenceEdit').addEventListener('keydown', function(event) {
@@ -112,6 +112,6 @@ document.querySelector('#sentenceEdit').addEventListener('keydown', function(eve
         let sentence = sentenceElement ? sentenceElement.value : ''; // sentenceElement가 없으면 빈 문자열 반환
         sentenceElement.value = '';
         //메세지를 백엔드로 송신
-        socket.emit("talkB",sentence, null, null, userMe);
+        socket.emit("talkB",sentence, userMe);
     }
 });
