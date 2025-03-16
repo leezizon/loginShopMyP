@@ -1,28 +1,32 @@
-# Node.js(Express)
+# 🛍️ Node.js 기반 웹 앱 팀프로젝트(진행중)  
 
-Express로 구현된 Node.js 백엔드 어플리케이션 템플릿입니다.
-## 🖇️ 준비 및 확인사항
+기본적인 **로그인, 상점, 마이페이지, 채팅** 기능이 구현된 웹 애플리케이션입니다.  
+현재 **기능은 정상적으로 동작하지만, UI 디자인이 미완성**된 상태입니다.  
+이 프로젝트를 기반으로 팀원들과 협업하여 프론트엔드 디자인을 개선할 계획입니다.  
 
-### 지원 Node 버전
-- 8, 10, 12, 14, 16, 18
-- ⚠️ 로컬/테스트 환경과 클라우드타입에서 설정한 Node 버전이 상이한 경우 정상적으로 빌드되지 않을 수 있습니다.
+## 🚀 기술 스택  
+- **Backend**: Node.js, Express, SQLite, WebSocket
+- **Frontend**: HTML, CSS (UI 미완성)  
+- **Authentication**: Passport.js  
+- **Deployment**: Cloudtype  
 
-### 패키지 명세
-- 빌드 시 어플리케이션에 사용된 패키지를 설치하기 위해서는 `package.json`, `package-json.json`, `yarn.lock` 중 1개의 파일이 저장소에 반영되어 있어야합니다.
-## ⌨️ 명령어
+## 🎨 주요 기능  
+✅ **로그아웃 & 로그인** (Passport.js 기반)  
+✅ - **장바구니 없이 즉시 구매 가능** (실제 결제 기능 없음) 
+✅ **마이페이지에서 회원 정보 확인 및 보유중인 아이템 확인 가능**
+✅ **데이터는 SQLite로 저장되며, 기본적인 CRUD 기능 구현됨**
+✅ **WebSocket 기반 실시간 채팅**으로, 다른 유저들과 대화
 
-### Install
+## ⏳ 현재 상태  
+- 🟢 **기능 정상 작동**  
+- 🔴 **UI 디자인 미완성**  
 
-```bash
-  npm ci
-```
+## 📌 실행 방법  
+# 패키지 설치
+npm install
 
-### Start
-
-```bash
-  npm start
-```
-
+# 서버 실행
+npm start
 
 ###클라우드 타입 배포 url입니다
 https://port-0-loginshopmyp-m1gt6wu5bc1fb43d.sel4.cloudtype.app/LOGIN
