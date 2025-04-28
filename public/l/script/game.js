@@ -1,10 +1,7 @@
 
 export var userList = [];
-export var userList_f = [];
 export var userRoom = 'asd';//룸이름
 export var userMe = 'asd'; //사용자키 
-export var userMeImg = 0; //사용자프로필사진번호
-export var profiliImg = '' //사용자프로필사진
 
 
 export const socket = io();
@@ -35,7 +32,7 @@ function playedScorePop(name){
     buttons.parentNode.removeChild(buttons);
     userRoom = name;
     //방참가
-    socket.emit("room",name,profiliImg);
+    socket.emit("room",name);
     document.getElementById('chatLog').classList.toggle("hidden-canvas");
         
 }
@@ -43,21 +40,19 @@ function playedScorePop(name){
 
 ////유저관리///
 // 유저 생성 함수
-function createUser(id, x, y,Sn,token, nic, profileSn) {
-    userList.push({ id, x, y, width: 100, height: 100, speed: 200, imgSn : Sn, userToken:token, nicName:nic, profileSn:profileSn});
+function createUser(id, x, y) {
+    userList.push({ id, x, y, width: 100, height: 100, speed: 200});
     console.log(userList.length);
     console.log(id+'생성됨');
 }
 //기존유저 생성
-socket.on("guestList", (guestList,guest,userListt,userImgSn,userToken,profileSn)=>{
+socket.on("guestList", (guest,userListt)=>{
     alert(guest);
     userMe = guest;
-    userMeImg = userImgSn;
     //기존유저생성
-    createUser(guest,50,50,userImgSn,userToken,'user'+userImgSn,profileSn);
-    console.log(userImgSn);
+    createUser(guest,50,50);
     for (let i = userListt.length - 1; i >= 0; i--){
-        createUser(userListt[i].id,userListt[i].x,userListt[i].y,userListt[i].imgSn,userListt[i].userToken,userListt[i].nicName,userListt[i].profileSn);
+        createUser(userListt[i].id,userListt[i].x,userListt[i].y);
     }
     //guestList에서 나를 포함한 유저리스트를 보냄
     socket.emit("updateGuestListOne",userList);
@@ -67,7 +62,6 @@ socket.on("guestList", (guestList,guest,userListt,userImgSn,userToken,profileSn)
 socket.on("updateGuestList", (List)=>{
     console.log('업데이트됩니다');
     userList = List;
-    userList_f = List;
 });
 
 //누군가 나갔을 때 서버수신

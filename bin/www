@@ -28,12 +28,7 @@ const io = new Server(server, {
       methods: ["GET", "POST"]
   }
 });
-var guestList = [];
-var userList = [];
-var roomList = [];
-
-var userSnList = [0,0,0]; //sn번호배정
-var userTokenList = [0,0,0]; //토큰이미지배정
+var userList = {};
 
 
 
@@ -43,36 +38,21 @@ io.on("connection",(socket)=>{
   });
 
   //프론트에서 방 참가 이후 백에서 처리
-  socket.on("room", (roomName,profiliImg) =>{
+  socket.on("room", (roomName) =>{
     // close the database connection
     socket.join(roomName);
-
-    //방은 중복으로 리스트에 넣지 않는다
-    if (!roomList.includes(roomName)) {
-      roomList.push(roomName);
-      guestList.push([]);
-      userList.push([]);
+    if(userList[roomName]== undefined){//방이름이 없으면
+      userList[roomName] = [];//방이름으로 방에 있는 유저리스트를 관리하기 위한 객체 생성
     }
 
-    var myRoomIdx = roomList.indexOf(roomName);
-    guestList[myRoomIdx].push(socket.id);
-
-    console.log(roomList);
-    console.log(myRoomIdx);
-    console.log(profiliImg);
+    console.log(userList);
     //방에 참여한 유저들에게 방에 참여한 유저들의 리스트를 보내준다
-    socket.emit("guestList",guestList[myRoomIdx],socket.id,userList[myRoomIdx],userSnList[myRoomIdx],userTokenList[myRoomIdx],profiliImg);
-    userSnList[myRoomIdx] = userSnList[myRoomIdx] + 1;
-    if(userTokenList[myRoomIdx] < 5){
-      userTokenList[myRoomIdx] = userTokenList[myRoomIdx] +1;
-    }else{
-      userTokenList[myRoomIdx] = 0;
-    }
+    socket.emit("guestList",socket.id,userList[roomName]);
   
     //프론트에서 방에 있는 모든 사람들의 리스트를 받음
     socket.on("updateGuestListOne", (List) =>{
-      userList[myRoomIdx] = List;//방에 있는 유저들의 리스트 업데이트
-      io.to(roomName).emit("updateGuestList", userList[myRoomIdx]);//다시 프론트로 유저리스트 보내줌
+      userList[roomName] = List;//방에 있는 유저들의 리스트 업데이트
+      io.to(roomName).emit("updateGuestList", userList[roomName]);//다시 프론트로 유저리스트 보내줌
     });
   
 
@@ -81,24 +61,14 @@ io.on("connection",(socket)=>{
     });
   
     socket.on("disconnecting", () =>{
-      if(guestList[myRoomIdx].length == 1){
-        // console.log(userList[myRoomIdx].length);
-        // console.log(userList[myRoomIdx]);
-        // console.log(guestList[myRoomIdx]);
-        guestList[myRoomIdx].splice(0,1);
-        userList[myRoomIdx].splice(0,1);
+      if(userList[roomName].length == 1){
+        userList[roomName].splice(0,1);
         console.log('혼자였는데나감');
-        //userList guestList 크기가 같은지 비교
-        if(userList[myRoomIdx].length!=guestList[myRoomIdx].length){
-          console.log('오류가 있는 방입니다, 방을 비웁니다');
-          guestList[myRoomIdx].splice(0);
-          userList[myRoomIdx].splice(0);
-        }
       }else{
         socket.rooms.forEach((room)=>socket.to(room).emit("bye",socket.id));
-        for (let i = guestList[myRoomIdx].length - 1; i >= 0; i--){
-          if(guestList[myRoomIdx][i]===socket.id){
-            guestList[myRoomIdx].splice(i,1);
+        for (let i = userList[roomName].length - 1; i >= 0; i--){
+          if(userList[roomName][i]===socket.id){
+            userList[roomName].splice(i,1);
             console.log('나감');
           }
         }
