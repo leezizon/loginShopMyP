@@ -6,34 +6,17 @@ export var userMe = 'asd'; //사용자키
 
 export const socket = io();
 
-
-//프로필 선택 버튼
-document.getElementById('asd').addEventListener('click', function(e){
-    playedScorePop('asd');
-});
-
-document.getElementById('rew').addEventListener('click',function(e){
-    playedScorePop('rew');
-});
-
-document.getElementById('zxc').addEventListener('click',function(e){
-    playedScorePop('zxc');
-});
-
-
-//사용자키 확인버튼
-document.getElementById('meButton').addEventListener('click',function(e){
-    alert(userMe);
-});
+window.onload = function() {
+    playedScorePop("name");
+}
 
 //방선택 함수
 function playedScorePop(name){
-    var buttons = document.getElementById("buttons");
-    buttons.parentNode.removeChild(buttons);
     userRoom = name;
     //방참가
     socket.emit("room",name);
     document.getElementById('chatLog').classList.toggle("hidden-canvas");
+    console.log("asdasd");
         
 }
 

@@ -24,15 +24,33 @@ app.set('port', port);
 var server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-      origin: "http://localhost:5500",
+      origin: "http://localhost:8080",
       methods: ["GET", "POST"]
   }
 });
+
+const jwt = require('jsonwebtoken');
+const SECRET = "your-256-bit-secret-which-should-be-at-least-32-bytes-zizonstests"; // Java 서버와 동일한 키
+
+io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    try {
+        const user = jwt.verify(token, SECRET);
+        socket.user = user;
+        next();
+    } catch (err) {
+        return next(new Error('Authentication error'));
+    }
+});
+
+
 var userList = {};
 
 
 
 io.on("connection",(socket)=>{
+  console.log(socket.user);
+  
   socket.onAny((event)=>{
     console.log(event);
   });
@@ -47,7 +65,7 @@ io.on("connection",(socket)=>{
 
     console.log(userList);
     //방에 참여한 유저들에게 방에 참여한 유저들의 리스트를 보내준다
-    socket.emit("guestList",socket.id,userList[roomName]);
+    socket.emit("guestList",socket.user.email,userList[roomName]);
   
     //프론트에서 방에 있는 모든 사람들의 리스트를 받음
     socket.on("updateGuestListOne", (List) =>{
