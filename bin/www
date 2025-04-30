@@ -81,13 +81,11 @@ io.on("connection",(socket)=>{
     socket.on("disconnecting", () =>{
       if(userList[roomName].length == 1){
         userList[roomName].splice(0,1);
-        console.log('혼자였는데나감');
       }else{
-        socket.rooms.forEach((room)=>socket.to(room).emit("bye",socket.id));
+        socket.rooms.forEach((room)=>socket.to(room).emit("bye",socket.user.email));
         for (let i = userList[roomName].length - 1; i >= 0; i--){
-          if(userList[roomName][i]===socket.user.email){
+          if(userList[roomName][i].id===socket.user.email){
             userList[roomName].splice(i,1);
-            console.log('나감');
           }
         }
       }
