@@ -29,6 +29,8 @@ const io = new Server(server, {
   }
 });
 
+const axios = require('axios');
+
 const jwt = require('jsonwebtoken');
 const SECRET = "your-256-bit-secret-which-should-be-at-least-32-bytes-zizonstests"; // Java 서버와 동일한 키
 
@@ -48,50 +50,60 @@ var userList = {};
 
 
 
-io.on("connection",(socket)=>{
-  console.log(socket.user);
-  
+io.on("connection",(socket)=>{  
   socket.onAny((event)=>{
     console.log(event);
   });
 
   //프론트에서 방 참가 이후 백에서 처리
-  socket.on("room", (roomName) =>{
-    // close the database connection
-    socket.join(roomName);
-    if(userList[roomName]== undefined){//방이름이 없으면
-      userList[roomName] = [];//방이름으로 방에 있는 유저리스트를 관리하기 위한 객체 생성
-    }
-
-    console.log(userList);
-    //방에 참여한 유저들에게 방에 참여한 유저들의 리스트를 보내준다
-    socket.emit("guestList",socket.user.email,userList[roomName]);
-  
-    //프론트에서 방에 있는 모든 사람들의 리스트를 받음
-    socket.on("updateGuestListOne", (List) =>{
-      userList[roomName] = List;//방에 있는 유저들의 리스트 업데이트
-      io.to(roomName).emit("updateGuestList", userList[roomName]);//다시 프론트로 유저리스트 보내줌
-    });
-  
-
-    socket.on("talkB", (sentence, nic) =>{
-      io.to(roomName).emit("talkF", sentence,nic);
-    });
-  
-    socket.on("disconnecting", () =>{
-      if(userList[roomName].length == 1){
-        userList[roomName].splice(0,1);
-      }else{
-        socket.rooms.forEach((room)=>socket.to(room).emit("bye",socket.user.email));
-        for (let i = userList[roomName].length - 1; i >= 0; i--){
-          if(userList[roomName][i].id===socket.user.email){
-            userList[roomName].splice(i,1);
-          }
+  socket.on("room", async (roomName) =>{
+    try {
+      // Java 서버에 룸 존재 여부 확인
+      const response = await axios.get(`http://localhost:8080/TeamFirst/api/room/exists?roomId=${roomName}`);
+      const exists = response.data.exists;
+      console.log(exists);
+      
+      if (exists) {
+        // close the database connection
+        socket.join(roomName);
+        if(userList[roomName]== undefined){//방이름이 없으면
+          userList[roomName] = [];//방이름으로 방에 있는 유저리스트를 관리하기 위한 객체 생성
         }
+
+        console.log(userList);
+        //방에 참여한 유저들에게 방에 참여한 유저들의 리스트를 보내준다
+        socket.emit("guestList",socket.user.email,userList[roomName]);
+      
+        //프론트에서 방에 있는 모든 사람들의 리스트를 받음
+        socket.on("updateGuestListOne", (List) =>{
+          userList[roomName] = List;//방에 있는 유저들의 리스트 업데이트
+          io.to(roomName).emit("updateGuestList", userList[roomName]);//다시 프론트로 유저리스트 보내줌
+        }); 
+
+        socket.on("talkB", (sentence, nic) =>{
+          io.to(roomName).emit("talkF", sentence,nic);
+        });
+      
+        socket.on("disconnecting", () =>{
+          if(userList[roomName].length == 1){
+            userList[roomName].splice(0,1);
+          }else{
+            socket.rooms.forEach((room)=>socket.to(room).emit("bye",socket.user.email));
+            for (let i = userList[roomName].length - 1; i >= 0; i--){
+              if(userList[roomName][i].id===socket.user.email){
+                userList[roomName].splice(i,1);
+              }
+            }
+          }
+        });
+      } else {
+        // 룸이 없다면 클라이언트에 알림
+        socket.emit("room-error", { message: "존재하지 않는 방입니다." });
       }
-    });
-
-
+    } catch (error) {
+      console.error("자바 서버 확인 중 오류 발생:", error.message);
+      socket.emit("room-error", { message: "서버 오류로 방 확인 실패" });
+    }
   });
 });
 
