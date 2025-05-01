@@ -56,7 +56,7 @@ setInterval(() => {
     const logsToSend = [...logBuffer];
     logBuffer = [];
 
-    axios.post("http://localhost:8080/TeamFirst/api/logs/save", logsToSend)
+    axios.post("https://51c6-106-242-127-51.ngrok-free.app/TeamFirst/api/logs/save", logsToSend)
       .then(() => console.log("로그 전송 완료"))
       .catch(err => {
         console.error("로그 전송 실패", err.message);
@@ -74,11 +74,11 @@ io.on("connection",(socket)=>{
   socket.on("room", async (roomName) =>{
     try {
       // Java 서버에 룸 존재 여부 확인
-      const response = await axios.get(`http://localhost:8080/TeamFirst/api/room/exists?roomId=${roomName}`);
+      const response = await axios.get(`https://51c6-106-242-127-51.ngrok-free.app/TeamFirst/api/room/exists?roomId=${roomName}`);
       const exists = response.data.exists;
 
       // Java 서버에 룸 안에 사용자 존재 여부 확인
-      const userResponse = await axios.get(`http://localhost:8080/TeamFirst/api/room/userExists?roomId=${roomName}&userId=${socket.user.seekerNo}`);
+      const userResponse = await axios.get(`https://51c6-106-242-127-51.ngrok-free.app/TeamFirst/api/room/userExists?roomId=${roomName}&userId=${socket.user.seekerNo}`);
       const userexists = userResponse.data.exists;
 
 
@@ -90,7 +90,7 @@ io.on("connection",(socket)=>{
         }
 
         // Java 서버에 룸 안의 로그 100개 가져오기
-        const logResponse = await axios.get(`http://localhost:8080/TeamFirst/api/logs/list?roomId=${roomName}`);
+        const logResponse = await axios.get(`https://51c6-106-242-127-51.ngrok-free.app/TeamFirst/api/logs/list?roomId=${roomName}`);
         const logs = logResponse.data;
 
         //방에 참여한 유저들에게 방에 참여한 유저들의 리스트를 보내준다
