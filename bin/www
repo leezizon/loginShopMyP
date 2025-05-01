@@ -24,7 +24,7 @@ app.set('port', port);
 var server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-      origin: "http://localhost:8080",
+      origin: "https://51c6-106-242-127-51.ngrok-free.app",
       methods: ["GET", "POST"]
   }
 });
