@@ -59,7 +59,7 @@ io.on("connection",(socket)=>{
   socket.on("room", async (roomName) =>{
     try {
       // Java 서버에 룸 존재 여부 확인
-      const response = await axios.get(`http://localhost:8080/TeamFirst/api/room/exists?roomId=${roomName}`);
+      const response = await axios.get(`https://846a-106-242-127-51.ngrok-free.app/TeamFirst/api/room/exists?roomId=${roomName}`);
       const exists = response.data.exists;
       console.log(exists);
       
