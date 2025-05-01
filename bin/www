@@ -48,7 +48,22 @@ io.use((socket, next) => {
 
 var userList = {};
 
+let logBuffer = [];//로그버퍼
 
+// 10초마다 로그 전송
+setInterval(() => {
+  if (logBuffer.length > 0) {
+    const logsToSend = [...logBuffer];
+    logBuffer = [];
+
+    axios.post("http://localhost:8080/TeamFirst/api/logs/save", logsToSend)
+      .then(() => console.log("로그 전송 완료"))
+      .catch(err => {
+        console.error("로그 전송 실패", err.message);
+        logBuffer.push(...logsToSend); // 실패 시 다시 버퍼에 저장
+      });
+  }
+}, 10000);
 
 io.on("connection",(socket)=>{  
   socket.onAny((event)=>{
@@ -59,20 +74,31 @@ io.on("connection",(socket)=>{
   socket.on("room", async (roomName) =>{
     try {
       // Java 서버에 룸 존재 여부 확인
-      const response = await axios.get(`https://846a-106-242-127-51.ngrok-free.app/TeamFirst/api/room/exists?roomId=${roomName}`);
+      const response = await axios.get(`http://localhost:8080/TeamFirst/api/room/exists?roomId=${roomName}`);
       const exists = response.data.exists;
-      console.log(exists);
-      
-      if (exists) {
+
+      // Java 서버에 룸 안에 사용자 존재 여부 확인
+      const userResponse = await axios.get(`http://localhost:8080/TeamFirst/api/room/userExists?roomId=${roomName}&userId=${socket.user.seekerNo}`);
+      const userexists = userResponse.data.exists;
+
+
+      if (exists && userexists) {
         // close the database connection
         socket.join(roomName);
         if(userList[roomName]== undefined){//방이름이 없으면
           userList[roomName] = [];//방이름으로 방에 있는 유저리스트를 관리하기 위한 객체 생성
         }
 
-        console.log(userList);
+        // Java 서버에 룸 안의 로그 100개 가져오기
+        const logResponse = await axios.get(`http://localhost:8080/TeamFirst/api/logs/list?roomId=${roomName}`);
+        const logs = logResponse.data;
+
         //방에 참여한 유저들에게 방에 참여한 유저들의 리스트를 보내준다
         socket.emit("guestList",socket.user.email,userList[roomName]);
+
+        for(let i=0;i<logs.length;i++){
+          socket.emit("talkF", logs[i].message,logs[i].email);
+        }
       
         //프론트에서 방에 있는 모든 사람들의 리스트를 받음
         socket.on("updateGuestListOne", (List) =>{
@@ -80,7 +106,15 @@ io.on("connection",(socket)=>{
           io.to(roomName).emit("updateGuestList", userList[roomName]);//다시 프론트로 유저리스트 보내줌
         }); 
 
+        console.log(userList);
+
         socket.on("talkB", (sentence, nic) =>{
+          logBuffer.push({
+            seekerNo: socket.user.seekerNo,
+            email: socket.user.email,
+            roomId: roomName,
+            message: sentence
+          });
           io.to(roomName).emit("talkF", sentence,nic);
         });
       
@@ -105,6 +139,7 @@ io.on("connection",(socket)=>{
       socket.emit("room-error", { message: "서버 오류로 방 확인 실패" });
     }
   });
+  
 });
 
 
